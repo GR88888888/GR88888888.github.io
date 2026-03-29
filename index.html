@@ -6,87 +6,83 @@
 <title>Typewriter</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: #0a0a0a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-  }
-
-  .wrap {
-    padding: 3rem 4rem;
-  }
-
-  .line {
+  body { background: #0a0a0a; min-height: 100vh; padding: 3rem 4rem; }
+  #output {
     font-family: 'JetBrains Mono', monospace;
     font-weight: 500;
     font-size: 18px;
     color: #e8e8e8;
     line-height: 2;
-    min-height: 2em;
+    white-space: pre-wrap;
   }
-
-  .line.pink {
-    color: #f0b8d0;
-    font-size: 15px;
-  }
-
+  #output .pink { color: #f0b8d0; }
   .cursor {
     display: inline-block;
-    width: 2px;
-    height: 1em;
+    width: 2px; height: 1em;
     background: #f0b8d0;
-    margin-left: 2px;
+    margin-left: 1px;
     vertical-align: middle;
     animation: blink 0.7s step-end infinite;
   }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 </style>
 </head>
 <body>
-
-<div class="wrap">
-  <div class="line pink" id="l1"></div>
-  <div class="line" id="l2"></div>
-  <div class="line" id="l3"></div>
-</div>
-
+<div id="output"><span class="cursor"></span></div>
 <script>
-const DELAY = 80;
-
-const lines = [
-  { el: "l1", text: "Hello!" },
-  { el: "l2", text: "I am your AI Mentor and product manager." },
-  { el: "l3", text: "How can I help?" },
+const segments = [
+  { text: "Hello!\n", pink: true },
+  { text: "I am your AI Mentor and product manager.\n", pink: false },
+  { text: "How can I help?", pink: false },
 ];
 
-function typeLine(lineIndex, charIndex) {
-  const line = lines[lineIndex];
-  const el = document.getElementById(line.el);
+const chars = [];
+segments.forEach(seg => {
+  for (const ch of seg.text) chars.push({ ch, pink: seg.pink });
+});
 
-  el.textContent = line.text.slice(0, charIndex);
-  const cur = document.createElement('span');
-  cur.className = 'cursor';
-  el.appendChild(cur);
+const output = document.getElementById('output');
+let index = 0;
+let currentSpan = null;
+let currentPink = null;
 
-  if (charIndex < line.text.length) {
-    setTimeout(() => typeLine(lineIndex, charIndex + 1), DELAY);
-  } else {
-    cur.remove();
-    el.textContent = line.text;
-  }
+function randDelay(ch) {
+  if (ch === '\n') return 80 + Math.random() * 60;
+  if (ch === ' ') return 20 + Math.random() * 25;
+  if (ch === ',' || ch === '.' || ch === '!') return 60 + Math.random() * 50;
+  return 28 + Math.random() * 32;
 }
 
-lines.forEach((_, i) => typeLine(i, 0));
-</script>
+function type() {
+  if (index >= chars.length) return;
+  const { ch, pink } = chars[index++];
 
+  const cur = output.querySelector('.cursor');
+  if (cur) cur.remove();
+
+  if (ch === '\n') {
+    currentSpan = null;
+    currentPink = null;
+    output.appendChild(document.createTextNode('\n'));
+  } else {
+    if (pink !== currentPink || !currentSpan) {
+      currentSpan = document.createElement('span');
+      if (pink) currentSpan.className = 'pink';
+      output.appendChild(currentSpan);
+      currentPink = pink;
+    }
+    currentSpan.textContent += ch;
+  }
+
+  const newCur = document.createElement('span');
+  newCur.className = 'cursor';
+  output.appendChild(newCur);
+
+  setTimeout(type, randDelay(ch));
+}
+
+type();
+</script>
 </body>
 </html>
