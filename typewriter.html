@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typewriter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    padding: 3rem 4rem;
+  }
+
+  .line {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 18px;
+    color: #e8e8e8;
+    line-height: 2;
+    min-height: 2em;
+  }
+
+  .line.pink {
+    color: #f0b8d0;
+    font-size: 15px;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: #f0b8d0;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.7s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="line pink" id="l1"></div>
+  <div class="line" id="l2"></div>
+  <div class="line" id="l3"></div>
+</div>
+
+<script>
+const DELAY = 80;
+
+const lines = [
+  { el: "l1", text: "Hello!" },
+  { el: "l2", text: "I am your AI Mentor and product manager." },
+  { el: "l3", text: "How can I help?" },
+];
+
+function typeLine(lineIndex, charIndex) {
+  const line = lines[lineIndex];
+  const el = document.getElementById(line.el);
+
+  el.textContent = line.text.slice(0, charIndex);
+  const cur = document.createElement('span');
+  cur.className = 'cursor';
+  el.appendChild(cur);
+
+  if (charIndex < line.text.length) {
+    setTimeout(() => typeLine(lineIndex, charIndex + 1), DELAY);
+  } else {
+    cur.remove();
+    el.textContent = line.text;
+  }
+}
+
+lines.forEach((_, i) => typeLine(i, 0));
+</script>
+
+</body>
+</html>
